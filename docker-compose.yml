@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  frontend:
+    container_name: flatfinder-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  backend:
+    container_name: flatfinder-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./backend/.env
