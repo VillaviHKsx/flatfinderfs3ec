@@ -1,0 +1,36 @@
+name: Deploy Frontend
+
+on:
+  push:
+    paths:
+      - 'frontend/**'
+      - 'docker-compose.yml'
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Add server to known_hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy via SSH
+        run: |
+          ssh ubuntu@${{ secrets.SERVER_IP }} "
+            cd /home/ubuntu/flatfinderfs3ec &&
+            git pull origin main &&
+            docker-compose build frontend &&
+            docker-compose up -d frontend
+          "
